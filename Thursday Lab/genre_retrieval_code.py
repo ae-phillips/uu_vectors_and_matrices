@@ -20,7 +20,17 @@ for i in range(len(top_40)):
     song_index = songs[songs["song_id"] == song_id].index[0]
     song_vector = X[song_index]
     top_scores = X @ song_vector
-    top_scores[song_index] = -np.inf
+
+    # Find the artist of the original song
+    artist = songs.loc[song_index, "artist_name"]
+
+    # Find all songs by that artist
+    same_artist = songs["artist_name"] == artist
+
+    # Remove all of them from consideration
+    top_scores[same_artist] = -np.inf
+
+    # Now find the top 3 remaining songs
     top_indices = np.argsort(top_scores)[::-1][:3]
     top_scores = top_scores[top_indices]
 
@@ -62,9 +72,19 @@ for i in range(len(top_40)):
 
     cos_top_scores = cosine_scores(X, song_vector)
 
-    cos_top_scores[song_index] = -np.inf
+    # Find the artist of the original song
+    artist = songs.loc[song_index, "artist_name"]
+
+    # Find all songs by that artist
+    same_artist = songs["artist_name"] == artist
+
+    # Remove all of them from consideration
+    cos_top_scores[same_artist] = -np.inf
+
+    # Now find the top 3 remaining songs
     cos_top_indices = np.argsort(cos_top_scores)[::-1][:3]
     cos_top_scores = cos_top_scores[cos_top_indices]
+
 
     genre_cos_results.loc[i, "cos1_artist"] = songs.iloc[cos_top_indices[0]]["artist_name"]
     genre_cos_results.loc[i, "cos1_song"] = songs.iloc[cos_top_indices[0]]["song_title"]
@@ -111,26 +131,35 @@ for i in range(len(top_40)):
     song_index = songs[songs["song_id"] == song_id].index[0]
     song_vector = TFIDF[song_index]
 
-    cos_top_scores = cosine_scores(TFIDF, song_vector)
+    cos_tfidf_scores = cosine_scores(TFIDF, song_vector)
 
-    cos_top_scores[song_index] = -np.inf
-    cos_top_indices = np.argsort(cos_top_scores)[::-1][:3]
-    cos_top_scores = cos_top_scores[cos_top_indices]
+    # Find the artist of the original song
+    artist = songs.loc[song_index, "artist_name"]
 
-    genre_cos_tfidf.loc[i, "cos1_artist"] = songs.iloc[cos_top_indices[0]]["artist_name"]
-    genre_cos_tfidf.loc[i, "cos1_song"] = songs.iloc[cos_top_indices[0]]["song_title"]
-    genre_cos_tfidf.loc[i, "cos1_genre"] = songs.iloc[cos_top_indices[0]]["genre"]
-    genre_cos_tfidf.loc[i, "cos1_score"] = cos_top_scores[0]
+    # Find all songs by that artist
+    same_artist = songs["artist_name"] == artist
 
-    genre_cos_tfidf.loc[i, "cos2_artist"] = songs.iloc[cos_top_indices[1]]["artist_name"]
-    genre_cos_tfidf.loc[i, "cos2_song"] = songs.iloc[cos_top_indices[1]]["song_title"]
-    genre_cos_tfidf.loc[i, "cos2_genre"] = songs.iloc[cos_top_indices[1]]["genre"]
-    genre_cos_tfidf.loc[i, "cos2_score"] = cos_top_scores[1]
+    # Remove all of them from consideration
+    cos_tfidf_scores[same_artist] = -np.inf
 
-    genre_cos_tfidf.loc[i, "cos3_artist"] = songs.iloc[cos_top_indices[2]]["artist_name"]
-    genre_cos_tfidf.loc[i, "cos3_song"] = songs.iloc[cos_top_indices[2]]["song_title"]
-    genre_cos_tfidf.loc[i, "cos3_genre"] = songs.iloc[cos_top_indices[2]]["genre"]
-    genre_cos_tfidf.loc[i, "cos3_score"] = cos_top_scores[2]
+    # Now find the top 3 remaining songs
+    cos_tfidf_indices = np.argsort(cos_tfidf_scores)[::-1][:3]
+    cos_tfidf_scores = cos_tfidf_scores[cos_tfidf_indices]
+
+    genre_cos_tfidf.loc[i, "tfidf_cos1_artist"] = songs.iloc[cos_tfidf_indices[0]]["artist_name"]
+    genre_cos_tfidf.loc[i, "tfidf_cos1_song"] = songs.iloc[cos_tfidf_indices[0]]["song_title"]
+    genre_cos_tfidf.loc[i, "tfidf_cos1_genre"] = songs.iloc[cos_tfidf_indices[0]]["genre"]
+    genre_cos_tfidf.loc[i, "tfidf_cos1_score"] = cos_tfidf_scores[0]
+
+    genre_cos_tfidf.loc[i, "tfidf_cos2_artist"] = songs.iloc[cos_tfidf_indices[1]]["artist_name"]
+    genre_cos_tfidf.loc[i, "tfidf_cos2_song"] = songs.iloc[cos_tfidf_indices[1]]["song_title"]
+    genre_cos_tfidf.loc[i, "tfidf_cos2_genre"] = songs.iloc[cos_tfidf_indices[1]]["genre"]
+    genre_cos_tfidf.loc[i, "tfidf_cos2_score"] = cos_tfidf_scores[1]
+
+    genre_cos_tfidf.loc[i, "tfidf_cos3_artist"] = songs.iloc[cos_tfidf_indices[2]]["artist_name"]
+    genre_cos_tfidf.loc[i, "tfidf_cos3_song"] = songs.iloc[cos_tfidf_indices[2]]["song_title"]
+    genre_cos_tfidf.loc[i, "tfidf_cos3_genre"] = songs.iloc[cos_tfidf_indices[2]]["genre"]
+    genre_cos_tfidf.loc[i, "tfidf_cos3_score"] = cos_tfidf_scores[2]
 
 genre_results = pd.concat(
     [
